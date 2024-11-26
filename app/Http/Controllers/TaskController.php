@@ -103,7 +103,7 @@ class TaskController extends Controller
     public function filterTask(FilterRequest $request)
     {
         $filter = new TaskFilter();
-        $tasks = Task::query()->with('user')->where('user_id', Auth::id());
+        $tasks = Auth::user()->tasks;
         $filteredTasks = $filter->apply($tasks, $request->all())->paginate(6);
 
         return response()->json([
