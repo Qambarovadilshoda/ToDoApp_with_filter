@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Filters\TaskFilter;
 use App\Models\Task;
 use App\Models\User;
+use App\Filters\TaskFilter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Http\Requests\FilterRequest;
 use App\Http\Resources\TaskResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreTaskRequest;
@@ -99,14 +100,30 @@ class TaskController extends Controller
             'message' => 'Task deleted',
         ], 204);
     }
-    public function filterTask(Request $request)
+    public function filterTask(FilterRequest $request)
     {
         $filter = new TaskFilter();
         $tasks = Task::query()->with('user')->where('user_id', Auth::id());
         $filteredTasks = $filter->apply($tasks, $request->all())->paginate(6);
 
         return response()->json([
-            'tasks' => TaskResource::collection($filteredTasks)
+            'tasks' => TaskResource::collection($filteredTasks),
+            'links' => [
+                'first' => $filteredTasks->url(1),
+                'last' => $filteredTasks->url($filteredTasks->lastPage()),
+                'prev' => $filteredTasks->previousPageUrl(),
+                'next' => $filteredTasks->nextPageUrl(),
+            ],
+            'meta' => [
+                'current_page' => $filteredTasks->currentPage(),
+                'from' => $filteredTasks->firstItem(),
+                'last_page' => $filteredTasks->lastPage(),
+                'path' => $filteredTasks->path(),
+                'per_page' => $filteredTasks->perPage(),
+                'to' => $filteredTasks->lastItem(),
+                'total' => $filteredTasks->total(),
+            ],
+
         ]);
 
     }
