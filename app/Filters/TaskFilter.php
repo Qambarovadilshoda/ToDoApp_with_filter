@@ -16,10 +16,9 @@ class TaskFilter
         if (isset($filters['completed'])) {
             $query->where('completed', $filters['completed']);
         }
-        if (isset($filters['created_at'])) {
-            $query->where('created_at', $filters['created_at']);
+        if (isset($filters['start_date']) && isset($filters['end_date'])) {
+            $query->whereBetween('created_at', [$filters['start_date'], $filters['end_date']]);
         }
-
         return $query;
     }
 }
